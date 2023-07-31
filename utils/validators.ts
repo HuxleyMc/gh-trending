@@ -10,3 +10,13 @@ export const validateLanguage = (language: string) => {
   }
   return null;
 };
+
+export const parseNumber = (str = "") => {
+  const number = Number.parseInt(str.replaceAll(",", "").trim());
+  return isNaN(number) ? 0 : number;
+};
+
+export const validateHexColor = (color: string) => {
+  const isValid = /^#([0-9A-F]{3}){1,2}$/i.test(color);
+  return isValid ? color : undefined;
+};
