@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import { SPOKEN_LANG } from "@/constants/filters";
 import { fetchRepos } from "@/utils/fetchRepos";
 
+/**
+ * @swagger
+ * /api/trending/[language]:
+ *  get:
+ *    description: Returns trending repositories for a given language
+ */
 export async function GET(
   request: Request,
   { params }: { params: { language: string } }

@@ -2,6 +2,13 @@ import { fetchDevelopers } from "@/utils/fetchDevelopers";
 
 import { NextResponse } from "next/server";
 
+/**
+ * @swagger
+ * /api/trending/developers:
+ *  get:
+ *   description: Returns trending developers
+ *
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 

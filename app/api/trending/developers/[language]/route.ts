@@ -3,6 +3,13 @@ import { fetchDevelopers } from "@/utils/fetchDevelopers";
 import { validateLanguage } from "@/utils/validators";
 import { NextResponse } from "next/server";
 
+/**
+ * @swagger
+ * /api/trending/developers/[language]:
+ *  get:
+ *   description: Returns trending developers for a given language
+ *
+ */
 export async function GET(
   request: Request,
   { params }: { params: { language: string } }

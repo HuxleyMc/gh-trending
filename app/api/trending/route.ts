@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { SPOKEN_LANG } from "@/constants/filters";
 import { fetchRepos } from "@/utils/fetchRepos";
 
+// Optinal parameters for since: daily, weekly, monthly
+/**
+ * @swagger
+ * /api/trending:
+ *   get:
+ *     description: Returns trending repositories
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
