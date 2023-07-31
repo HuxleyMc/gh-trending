@@ -1,12 +1,6 @@
-import {
-  parseNumber,
-  validateHexColor,
-  validateLanguage,
-} from "@/utils/validators";
+import { validateLanguage } from "@/utils/validators";
 import { NextResponse } from "next/server";
-import axios from "axios";
-import * as cheerio from "cheerio";
-import { Repo } from "@/types";
+
 import { SPOKEN_LANG } from "@/constants/filters";
 import { fetchRepos } from "@/utils/fetchRepos";
 
@@ -40,7 +34,7 @@ export async function GET(
 
   return NextResponse.json(repos, {
     headers: {
-      "Cache-Control": "s-maxage=600",
+      "Cache-Control": "public, max-age=600",
     },
   });
 }

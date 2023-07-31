@@ -1,11 +1,4 @@
-import {
-  parseNumber,
-  validateHexColor,
-  validateLanguage,
-} from "@/utils/validators";
 import { NextResponse } from "next/server";
-import axios from "axios";
-import { Repo } from "@/types";
 import { SPOKEN_LANG } from "@/constants/filters";
 import { fetchRepos } from "@/utils/fetchRepos";
 
@@ -30,7 +23,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json(repos, {
     headers: {
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "public, max-age=600",
     },
   });
 }
