@@ -20,20 +20,22 @@ export class Cache {
   // Max age in seconds
   private maxAge: number = CACHE_MAX_AGE;
 
-  async handle(key: string, callback: () => Promise<Repo[] | Developer[]>) {
-    const cachedItem = this.cache.get(key);
-
+  async set(key: string, results: Repo[] | Developer[]) {
     this.clearIfTooLarge();
+
+    this.cache.set(key, {
+      key,
+      value: results,
+      lastUpdated: Date.now(),
+    });
+  }
+
+  get(key: string) {
+    const cachedItem = this.cache.get(key);
 
     if (!cachedItem || this.checkStale(cachedItem.lastUpdated)) {
       console.log("Cache miss: ", key);
-      const value = await callback();
-      this.cache.set(key, {
-        key,
-        value,
-        lastUpdated: Date.now(),
-      });
-      return value;
+      return null;
     }
 
     return cachedItem.value;
