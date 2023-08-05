@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { SPOKEN_LANG } from "@/constants/filters";
 import { fetchRepos } from "@/utils/fetchRepos";
+import { getCacheHeaders } from "@/utils";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json(repos, {
     headers: {
-      "Cache-Control": "public, max-age=600",
+      ...getCacheHeaders(),
     },
   });
 }

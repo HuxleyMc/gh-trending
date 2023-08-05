@@ -1,3 +1,4 @@
+import { getCacheHeaders } from "@/utils";
 import { fetchDevelopers } from "@/utils/fetchDevelopers";
 
 import { NextResponse } from "next/server";
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json(developers, {
     headers: {
-      "Cache-Control": "public, max-age=600",
+      ...getCacheHeaders(),
     },
   });
 }
