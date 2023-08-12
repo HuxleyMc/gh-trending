@@ -8,6 +8,6 @@ export const getLanguageCode = (language: string) => {
 // Utils for creating cache headers
 export const getCacheHeaders = (maxAge: number = CACHE_MAX_AGE) => {
   return {
-    "cache-control": `max-age=${maxAge}`,
+    "Cache-Control": `s-maxage=${maxAge}`,
   };
 };

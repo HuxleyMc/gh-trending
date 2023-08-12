@@ -4,6 +4,9 @@ import { developersSchema } from "@/schemas/developer";
 import { z } from "zod";
 import { kv } from "@vercel/kv";
 
+// In dev we don't want to cache anything
+const isCacheEnabled = process.env.CACHE_ENABLED !== "false";
+
 const cacheSchema = z.object({
   // Data is either Developers or Repositories
   data: z.union([repositoriesSchema, developersSchema]),
@@ -14,6 +17,9 @@ const cacheSchema = z.object({
 export type Cache = z.infer<typeof cacheSchema>;
 
 export const setCachedItem = async (key: string, value: Cache) => {
+  if (!isCacheEnabled) {
+    return;
+  }
   console.log("Setting cache for: ", key);
   try {
     await kv.set(key, value, {
@@ -27,6 +33,9 @@ export const setCachedItem = async (key: string, value: Cache) => {
 export const getCachedItem = async (
   key: string
 ): Promise<Cache["data"] | null> => {
+  if (!isCacheEnabled) {
+    return null;
+  }
   console.log("Getting cache for: ", key);
   try {
     const cachedItem = await kv.get<Cache>(key);

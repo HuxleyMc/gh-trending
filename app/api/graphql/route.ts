@@ -5,83 +5,11 @@ import { fetchRepos } from "@/utils/fetchRepos";
 import { useAPQ as createAutomaticPersistedQuery } from "@graphql-yoga/plugin-apq";
 import { useResponseCache as createResponseCache } from "@graphql-yoga/plugin-response-cache";
 import { CACHE_MAX_AGE } from "@/constants";
-const fragment = `
-`;
-
-const enums = `
-enum Since {
-    DAILY
-    WEEKLY
-    MONTHLY
-}
-
-enum SpokenLanguage {
-    ${SPOKEN_LANG.map(({ code }) => `${code.toUpperCase()}`).join("\n")}
-}
-`;
-
-const types = `
-type PopularRepository {
-    description: String
-    name: String
-    url: String
-}
-
-type Developer {
-    avatar: String
-    name: String
-    nickname: String
-    url: String!
-    popularRepository: PopularRepository
-    canSponsor: Boolean
-}
-
-type Builder {
-    avatar: String
-    url: String
-    username: String
-}
-
-type Repository {
-    author: String
-    avatar: String
-    builtBy: [Builder]
-    canSponsor: Boolean
-    description: String
-    forks: Int
-    language: String
-    languageColor: String
-    name: String
-    newStars: Int
-    stars: Int
-    url: String
-}
-`;
-
-const queries = `
-type Query {
-    Developers(
-        language: String
-        since: Since = "DAILY"
-        sponsorable: Boolean
-    ): [Developer]
-
-    Repositories(
-        language: String
-        spokenLanguage: SpokenLanguage = "EN"
-        since: Since = "DAILY"
-    ): [Repository]
-}
-`;
+import { typeDefs } from "@/schemas/graphql";
 
 const { handleRequest } = createYoga({
   schema: createSchema({
-    typeDefs: /* GraphQL */ `
-      ${enums}
-      ${types}
-      ${fragment}
-      ${queries}
-    `,
+    typeDefs: typeDefs,
     resolvers: {
       Since: {
         DAILY: "daily",
@@ -132,7 +60,6 @@ const { handleRequest } = createYoga({
     createResponseCache({
       session: () => null,
       ttl: CACHE_MAX_AGE,
-      enabled: () => true,
     }),
     createAutomaticPersistedQuery(),
   ],

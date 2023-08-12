@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { CACHE_MAX_AGE, GITHUB_URL } from "@/constants";
+import { GITHUB_URL } from "@/constants";
 import { getCachedItem, setCachedItem } from "@/utils/cache";
 import { Developers, developersSchema } from "@/schemas/developer";
 

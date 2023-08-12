@@ -1,6 +1,6 @@
 import { parseNumber, validateHexColor } from "@/utils/validators";
 import * as cheerio from "cheerio";
-import { CACHE_MAX_AGE, GITHUB_URL } from "@/constants";
+import { GITHUB_URL } from "@/constants";
 import { getCachedItem, setCachedItem } from "@/utils/cache";
 import { Repositories, repositoriesSchema } from "@/schemas/repository";
 
@@ -27,6 +27,8 @@ export const fetchRepos = async (
     return cachedItem as Repositories;
   }
 
+  const hasLanguage = language.length > 1;
+
   const queryUrl = new URL(`${GITHUB_URL}/trending/${language}`);
   queryUrl.searchParams.set("since", since);
   queryUrl.searchParams.set("spoken_language_code", spokenLanguage);
@@ -48,6 +50,9 @@ export const fetchRepos = async (
 
   const repos = $(".Box article.Box-row");
 
+  let sharedLanguage = "";
+  let sharedLanguageColor = "";
+
   const formattedRepos: Repositories = repos.get().map((repo) => {
     const $repo = $(repo);
 
@@ -64,11 +69,35 @@ export const fetchRepos = async (
 
     const description = hasDescription ? descriptionElement.text().trim() : "";
 
-    const language =
-      $repo
-        .find(`div:nth-child(${hasDescription ? 4 : 3}) > span:nth-child(1)`)
-        .text()
-        .trim() ?? "";
+    let language = hasLanguage ? sharedLanguage : "";
+
+    if (language.length === 0) {
+      console.log("getting language");
+      language =
+        $repo
+          .find(`div:nth-child(${hasDescription ? 4 : 3}) > span:nth-child(1)`)
+          .text()
+          .trim() ?? "";
+
+      if (language.length > 0 && hasLanguage) {
+        sharedLanguage = language;
+      }
+    }
+
+    let languageColor = hasLanguage ? sharedLanguageColor : undefined;
+
+    if (!languageColor || languageColor.length === 0) {
+      console.log("getting language color");
+      languageColor = validateHexColor(
+        $repo
+          .find("div:nth-child(4) > span:nth-child(1) > span:nth-child(1)")
+          .css("background-color") ?? ""
+      );
+
+      if (languageColor && languageColor.length > 0 && hasLanguage) {
+        sharedLanguageColor = languageColor;
+      }
+    }
 
     const stars = parseNumber(
       $repo
@@ -91,12 +120,6 @@ export const fetchRepos = async (
     );
 
     const url = `${GITHUB_URL}${href}`;
-
-    const languageColor = validateHexColor(
-      $repo
-        .find("div:nth-child(4) > span:nth-child(1) > span:nth-child(1)")
-        .css("background-color") ?? ""
-    );
 
     const canSponsor =
       $repo.find("div:nth-child(1) > a:nth-child(1)").text().trim() ===
