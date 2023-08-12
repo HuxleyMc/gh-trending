@@ -7,4 +7,4 @@ export const CACHE_MAX_AGE =
     ? envCacheTime
       ? parseInt(envCacheTime)
       : 1800
-    : 60;
+    : 30;
