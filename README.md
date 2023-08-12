@@ -7,7 +7,7 @@ This repository provides an API/GraphQL endpoint to fetch trending repositories 
 
 ## FAQ
 
-#### GraphQL Endpoint
+#### GraphQL Endpoint (Including Playground)
 
 https://gh-trending.vercel.app/api/graphql
 
@@ -53,7 +53,15 @@ None yet but if you do, let me know and I will add it here.
         "name": "axios",
         "newStars": 14,
         "stars": 101222,
-        "url": "https://github.com/axios/axios"
+        "url": "https://github.com/axios/axios",
+        "builtBy": [
+            {
+              "avatar": "https://avatars.githubusercontent.com/u/4814473?s=40&v=4",
+              "url": "https://github.com/jasonsaayman",
+              "username": "jasonsaayman"
+            },
+            ...
+        ]
     },
     ...
 ]
@@ -85,7 +93,15 @@ None yet but if you do, let me know and I will add it here.
         "name": "axios",
         "newStars": 14,
         "stars": 101222,
-        "url": "https://github.com/axios/axios"
+        "url": "https://github.com/axios/axios",
+        "builtBy": [
+            {
+              "avatar": "https://avatars.githubusercontent.com/u/4814473?s=40&v=4",
+              "url": "https://github.com/jasonsaayman",
+              "username": "jasonsaayman"
+            },
+            ...
+        ]
     },
     ...
 ]
