@@ -13,11 +13,19 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid since" }, { status: 400 });
   }
 
-  const developers = await fetchDevelopers("", since, sponsorable);
+  try {
+    const developers = await fetchDevelopers("", since, sponsorable);
 
-  return NextResponse.json(developers, {
-    headers: {
-      ...getCacheHeaders(),
-    },
-  });
+    return NextResponse.json(developers, {
+      headers: {
+        ...getCacheHeaders(),
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      // TODO: Improve error message
+      { error: "Looks like there was an error" },
+      { status: 500 }
+    );
+  }
 }
