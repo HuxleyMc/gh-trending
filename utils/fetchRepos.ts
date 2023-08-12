@@ -15,7 +15,7 @@ export const fetchRepos = async (
   language: string,
   since: string = "daily",
   spokenLanguage: string
-) => {
+): Promise<Repositories | null> => {
   const cacheKey = cacheKeyBuilder(
     language.length > 1 ? language : "all",
     since,
@@ -24,7 +24,7 @@ export const fetchRepos = async (
 
   const cachedItem = await getCachedItem(cacheKey);
   if (cachedItem) {
-    return cachedItem;
+    return cachedItem as Repositories;
   }
 
   const queryUrl = new URL(`${GITHUB_URL}/trending/${language}`);
@@ -36,7 +36,6 @@ export const fetchRepos = async (
   console.time("Request");
   const response = await fetch(queryUrl.toString(), {
     next: {
-      revalidate: CACHE_MAX_AGE,
       tags: ["trending", "language", language, since],
     },
   });
