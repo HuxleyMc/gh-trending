@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@graphql-yoga/plugin-apq": "^2.0.4",
+    "@graphql-yoga/plugin-response-cache": "^2.1.1",
     "@types/node": "20.4.5",
     "@types/react": "18.2.17",
     "@types/react-dom": "18.2.7",

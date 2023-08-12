@@ -2,7 +2,9 @@ import { createSchema, createYoga } from "graphql-yoga";
 import { fetchDevelopers } from "@/utils/fetchDevelopers";
 import { SPOKEN_LANG } from "@/constants/filters";
 import { fetchRepos } from "@/utils/fetchRepos";
-
+import { useAPQ as createAutomaticPersistedQuery } from "@graphql-yoga/plugin-apq";
+import { useResponseCache as createResponseCache } from "@graphql-yoga/plugin-response-cache";
+import { CACHE_MAX_AGE } from "@/constants";
 const fragment = `
 `;
 
@@ -124,6 +126,16 @@ const { handleRequest } = createYoga({
 
   // Yoga needs to know how to create a valid Next response
   fetchAPI: { Response },
+
+  // Plugins
+  plugins: [
+    createResponseCache({
+      session: () => null,
+      ttl: CACHE_MAX_AGE,
+      enabled: () => true,
+    }),
+    createAutomaticPersistedQuery(),
+  ],
 });
 
 export { handleRequest as GET, handleRequest as POST };
