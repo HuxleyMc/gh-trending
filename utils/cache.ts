@@ -1,62 +1,59 @@
-/*
-    A class the manages a simple cache
-    If the item is not in the cache, it will be fetched and added to the cache
-    If the item is in the cache, check if it is stale and refetch if it is
-    If the item is in the cache and not stale, return the cached item
-*/
-
 import { CACHE_MAX_AGE } from "@/constants";
-import { Repo, Developer } from "@/types";
+import { repositoriesSchema } from "@/schemas/repository";
+import { developersSchema } from "@/schemas/developer";
+import { z } from "zod";
+import { kv } from "@vercel/kv";
 
-interface CacheItem {
-  key: string;
-  value: Repo[] | Developer[];
-  lastUpdated: number;
-}
+const cacheSchema = z.object({
+  // Data is either Developers or Repositories
+  data: z.union([repositoriesSchema, developersSchema]),
+  // The time the data was fetched
+  timestamp: z.number(),
+});
 
-export class Cache {
-  private cache = new Map<string, CacheItem>();
+export type Cache = z.infer<typeof cacheSchema>;
 
-  // Max age in seconds
-  private maxAge: number = CACHE_MAX_AGE;
-
-  async set(key: string, results: Repo[] | Developer[]) {
-    this.clearIfTooLarge();
-
-    this.cache.set(key, {
-      key,
-      value: results,
-      lastUpdated: Date.now(),
+export const setCachedItem = async (key: string, value: Cache) => {
+  console.log("Setting cache for: ", key);
+  try {
+    await kv.set(key, value, {
+      ex: CACHE_MAX_AGE, // Expire after 1 hour
     });
+  } catch (error) {
+    console.error(`Failed to set cache for ${key}: ${error}`);
   }
+};
 
-  get(key: string) {
-    const cachedItem = this.cache.get(key);
-
-    if (!cachedItem || this.checkStale(cachedItem.lastUpdated)) {
-      console.log("Cache miss: ", key);
-      return null;
+export const getCachedItem = async (
+  key: string
+): Promise<Cache["data"] | null> => {
+  console.log("Getting cache for: ", key);
+  try {
+    const cachedItem = await kv.get<Cache>(key);
+    if (cachedItem) {
+      const parsedCachedItem = cacheSchema.parse(cachedItem);
+      return parsedCachedItem.data;
     }
-
-    return cachedItem.value;
+  } catch (error) {
+    console.error(`Failed to get cache for ${key}: ${error}`);
   }
+  return null;
+};
 
-  private checkStale = (lastUpdated: number) => {
-    const now = Date.now();
-    const diff = now - lastUpdated;
-    const diffInSeconds = diff / 1000;
-    const isStale = diffInSeconds > this.maxAge;
-    // Check if the lastUpdated was a previous day
-    const isPreviousDay =
-      new Date(now).getDate() !== new Date(lastUpdated).getDate();
-    return isStale || isPreviousDay;
-  };
+export const deleteCachedItem = async (key: string) => {
+  console.log("Deleting cache for: ", key);
+  try {
+    await kv.del(key);
+  } catch (error) {
+    console.error(`Failed to delete cache for ${key}: ${error}`);
+  }
+};
 
-  private clearIfTooLarge = () => {
-    if (this.cache.size > 10) {
-      this.cache.clear();
-    }
-  };
-}
-
-export const cacheInstance = new Cache();
+export const flushCache = async () => {
+  console.log("Flushing cache");
+  try {
+    await kv.flushall();
+  } catch (error) {
+    console.error(`Failed to flush cache: ${error}`);
+  }
+};

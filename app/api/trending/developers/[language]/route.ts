@@ -23,11 +23,19 @@ export async function GET(
     return NextResponse.json({ error: "Invalid language" }, { status: 400 });
   }
 
-  const developers = await fetchDevelopers(language, since, sponsorable);
+  try {
+    const developers = await fetchDevelopers(language, since, sponsorable);
 
-  return NextResponse.json(developers, {
-    headers: {
-      ...getCacheHeaders(),
-    },
-  });
+    return NextResponse.json(developers, {
+      headers: {
+        ...getCacheHeaders(),
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      // TODO: Improve error message
+      { error: "Looks like there was an error" },
+      { status: 500 }
+    );
+  }
 }

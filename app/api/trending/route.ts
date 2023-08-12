@@ -20,11 +20,19 @@ export async function GET(request: Request) {
     );
   }
 
-  const repos = await fetchRepos("", since, spokenLanguage);
+  try {
+    const repos = await fetchRepos("", since, spokenLanguage);
 
-  return NextResponse.json(repos, {
-    headers: {
-      ...getCacheHeaders(),
-    },
-  });
+    return NextResponse.json(repos, {
+      headers: {
+        ...getCacheHeaders(),
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      // TODO: Improve error message
+      { error: "Looks like there was an error" },
+      { status: 500 }
+    );
+  }
 }

@@ -31,11 +31,19 @@ export async function GET(
     );
   }
 
-  const repos = await fetchRepos(language, since, spokenLanguage);
+  try {
+    const repos = await fetchRepos(language, since, spokenLanguage);
 
-  return NextResponse.json(repos, {
-    headers: {
-      ...getCacheHeaders(),
-    },
-  });
+    return NextResponse.json(repos, {
+      headers: {
+        ...getCacheHeaders(),
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      // TODO: Improve error message
+      { error: "Looks like there was an error" },
+      { status: 500 }
+    );
+  }
 }

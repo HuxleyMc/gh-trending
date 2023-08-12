@@ -1,26 +1,37 @@
 import { parseNumber, validateHexColor } from "@/utils/validators";
 import * as cheerio from "cheerio";
-import { Repo } from "@/types";
 import { CACHE_MAX_AGE, GITHUB_URL } from "@/constants";
-import { cacheInstance } from "@/utils/cache";
+import { getCachedItem, setCachedItem } from "@/utils/cache";
+import { Repositories, repositoriesSchema } from "@/schemas/repository";
+
+const cacheKeyBuilder = (
+  language: string,
+  since: string,
+  spokenLanguage: string
+) =>
+  `repos_${language.length >= 1 ? language : "all"}_${since}_${spokenLanguage}`;
 
 export const fetchRepos = async (
   language: string,
   since: string = "daily",
   spokenLanguage: string
 ) => {
+  const cacheKey = cacheKeyBuilder(
+    language.length > 1 ? language : "all",
+    since,
+    spokenLanguage
+  );
+
+  const cachedItem = await getCachedItem(cacheKey);
+  if (cachedItem) {
+    return cachedItem;
+  }
+
   const queryUrl = new URL(`${GITHUB_URL}/trending/${language}`);
   queryUrl.searchParams.set("since", since);
   queryUrl.searchParams.set("spoken_language_code", spokenLanguage);
 
   console.log("Query URL: ", queryUrl.toString());
-
-  const cachedRepos = cacheInstance.get(queryUrl.toString());
-
-  if (cachedRepos) {
-    console.log("Cache hit!");
-    return cachedRepos;
-  }
 
   console.time("Request");
   const response = await fetch(queryUrl.toString(), {
@@ -29,16 +40,16 @@ export const fetchRepos = async (
       tags: ["trending", "language", language, since],
     },
   });
-  const data = await response.text();
+  const responseData = await response.text();
   console.timeEnd("Request");
 
   console.time("Parsing");
 
-  const $ = cheerio.load(data);
+  const $ = cheerio.load(responseData);
 
   const repos = $(".Box article.Box-row");
 
-  const formattedRepos: Array<Repo> = repos.get().map((repo) => {
+  const formattedRepos: Repositories = repos.get().map((repo) => {
     const $repo = $(repo);
 
     const href = $repo.find("h2 > a")?.prop("href")?.trim();
@@ -135,9 +146,18 @@ export const fetchRepos = async (
       !url.includes("github.comundefined")
   );
 
+  const data = repositoriesSchema.safeParse(filteredRepos);
+
+  if (!data.success) {
+    throw new Error("Failed to parse repositories");
+  }
+
   console.timeEnd("Parsing");
 
-  cacheInstance.set(queryUrl.toString(), filteredRepos);
+  await setCachedItem(cacheKey, {
+    data: data.data,
+    timestamp: Date.now(),
+  });
 
   return filteredRepos;
 };
